@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Service Requests</title>
+    <link rel="stylesheet" href="{% static 'service_requests/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Your Service Requests</h1>
+        
+        <!-- Dropdown to filter by status -->
+        <label for="status-filter">Filter by Status:</label>
+        <select id="status-filter">
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+        </select>
+
+        <div id="service-requests-container">
+            <p>Loading requests...</p>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        // Fetch service requests and update dynamically
+        function loadServiceRequests(statusFilter = 'all') {
+            $.ajax({
+                url: "{% url 'get_service_requests' %}?status=" + statusFilter,
+                method: 'GET',
+                success: function (data) {
+                    let container = $('#service-requests-container');
+                    container.empty();
+                    data.requests.forEach(function (req) {
+                        container.append(
+                            `<div class="request">
+                                <p><strong>Service Type:</strong> ${req.service_type}</p>
+                                <p><strong>Status:</strong> ${req.status}</p>
+                                <p><strong>Created At:</strong> ${req.created_at}</p>
+                                <p><strong>Updated At:</strong> ${req.updated_at}</p>
+                            </div><hr>`
+                        );
+                    });
+                }
+            });
+        }
+
+        // Initially load all requests
+        loadServiceRequests();
+
+        // Reload requests based on filter
+        $('#status-filter').on('change', function () {
+            let selectedStatus = $(this).val();
+            loadServiceRequests(selectedStatus);
+        });
+
+    </script>
+</body>
+</html>

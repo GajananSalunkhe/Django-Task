@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Service Request</title>
+    <link rel="stylesheet" href="{% static 'service_requests/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Submit Service Request</h1>
+
+        <!-- Display Form for Service Request -->
+        <form method="POST" enctype="multipart/form-data" id="service-request-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="service_type">Service Type</label>
+                {{ form.service_type }}
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                {{ form.description }}
+            </div>
+
+            <div class="form-group">
+                <label for="attached_file">Attach a File (if any)</label>
+                {{ form.attached_file }}
+            </div>
+
+            <button type="submit" class="btn">Submit Request</button>
+        </form>
+
+        <!-- Display success or error messages -->
+        <div id="message-container"></div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $('#service-request-form').on('submit', function (e) {
+            e.preventDefault();  // Prevent the form from submitting the traditional way
+
+            let formData = new FormData(this);
+            
+            $.ajax({
+                url: "{% url 'submit_request' %}",
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    let messageContainer = $('#message-container');
+                    if (data.success) {
+                        messageContainer.html(`<p style="color: green;">${data.message}</p>`);
+                    } else {
+                        let errors = Object.values(data.errors).flat().join('<br>');
+                        messageContainer.html(`<p style="color: red;">${errors}</p>`);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
